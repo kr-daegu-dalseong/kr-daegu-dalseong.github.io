@@ -221,342 +221,393 @@
 </head>
 <body>
 <style>
-  @import url("https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;500;700&display=swap");
-
-  .db-root{
-    /* 비슬산 참꽃(진달래) 색감 */
-    --db-jindal:#6A1B4D;     /* 진달래 진한 자주 */
-    --db-jindal-soft:#a83b7e;
-    --db-jindal-pale:#f3d9e7;
-    --db-leaf:#8BC34A;       /* 참꽃 잎·비슬산 신록 */
-    --db-leaf-deep:#5c8a2c;
-    --db-wall:#efe7d6;       /* 담벼락 회벽 */
-    --db-wall-2:#e6dcc6;
-    --db-wall-shadow:#c9bda0;
-    --db-brick:#c98a5e;      /* 담장 벽돌 */
-    --db-ink:#3a2b2f;
-    --db-cream:#fbf6ec;
-    font-family:"Noto Sans KR","Apple SD Gothic Neo",sans-serif;
-    color:var(--db-ink);
-    line-height:1.8;
+  :root{
+    --topo-green:#228B22;
+    --topo-blue:#4169E1;
+    --topo-ink:#0f2417;
+    --topo-paper:#f4f7f1;
+    --topo-line:rgba(34,139,34,.28);
+    --topo-line-strong:rgba(34,139,34,.55);
+    --topo-mono:"D2Coding","Fira Code",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  #dalseong-topo *{box-sizing:border-box}
+  #dalseong-topo{
+    position:relative;
+    font-family:var(--topo-mono);
+    color:var(--topo-ink);
+    background:var(--topo-paper);
+    line-height:1.75;
+    overflow:hidden;
     -webkit-font-smoothing:antialiased;
   }
-  .db-root *{box-sizing:border-box;}
+  /* ===== 등고선 배경 (SVG, aria-hidden) ===== */
+  #dalseong-topo .topo-bg,
+  #dalseong-topo .topo-magnify{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    z-index:0;
+  }
+  #dalseong-topo .topo-bg{opacity:.9}
+  /* 돋보기 레이어: 커서 반경만 선명+줌 */
+  #dalseong-topo .topo-magnify{
+    z-index:1;
+    opacity:0;
+    transition:opacity .35s ease;
+    -webkit-mask-image:radial-gradient(circle var(--mag-r,120px) at var(--mx,-999px) var(--my,-999px),#000 0%,#000 62%,rgba(0,0,0,.15) 82%,transparent 100%);
+    mask-image:radial-gradient(circle var(--mag-r,120px) at var(--mx,-999px) var(--my,-999px),#000 0%,#000 62%,rgba(0,0,0,.15) 82%,transparent 100%);
+  }
+  #dalseong-topo.mag-on .topo-magnify{opacity:1}
+  #dalseong-topo .topo-magnify .topo-svg{
+    transform-origin:var(--mx,50%) var(--my,50%);
+    transform:scale(1.55);
+    transition:transform .12s linear;
+  }
+  #dalseong-topo .topo-svg{width:100%;height:100%;display:block}
 
-  /* ---------- 지붕 하늘 + 담장 헤더 ---------- */
-  .db-hero{
-    position:relative;
-    border-radius:20px 20px 6px 6px;
-    overflow:hidden;
-    padding:clamp(26px,5vw,52px) clamp(20px,5vw,54px) clamp(60px,8vw,84px);
-    background:
-      radial-gradient(120% 90% at 15% 0%, #fbe6f0 0%, rgba(251,230,240,0) 55%),
-      linear-gradient(180deg,#d8ecff 0%, #eaf3ff 34%, var(--db-wall) 34%, var(--db-wall) 100%);
-    isolation:isolate;
-  }
-  /* 담장 위 기와 라인 */
-  .db-tiles{
-    position:absolute;left:0;right:0;top:calc(34% - 12px);height:16px;z-index:1;
-    background:
-      radial-gradient(circle at 10px -2px, var(--db-jindal) 0 7px, transparent 8px) repeat-x;
-    background-size:20px 16px;opacity:.55;
-  }
-  .db-hero-in{position:relative;z-index:3;max-width:720px;}
-  .db-eyebrow{
-    display:inline-block;
-    font-family:"Nanum Pen Script",cursive;
-    font-size:clamp(22px,4vw,30px);
-    color:var(--db-jindal);
-    background:var(--db-cream);
-    border:2px solid var(--db-jindal);
-    border-radius:999px;
-    padding:2px 20px;
-    transform:rotate(-2deg);
-    box-shadow:3px 4px 0 rgba(106,27,77,.18);
-  }
-  .db-title{
-    margin:14px 0 8px;
-    font-family:"Gaegu","Noto Sans KR",cursive;
-    font-weight:700;
-    font-size:clamp(34px,8vw,66px);
-    line-height:1.02;
-    color:var(--db-jindal);
-    text-shadow:2px 3px 0 #fff, 4px 6px 0 rgba(106,27,77,.14);
-  }
-  .db-sub{
-    max-width:38ch;
-    font-family:"Gaegu","Noto Sans KR",cursive;
-    font-size:clamp(17px,3vw,22px);
-    color:#5a4046;
-  }
-  .db-hint{
-    margin-top:20px;
-    display:inline-flex;align-items:center;gap:10px;
-    font-family:"Nanum Pen Script",cursive;
-    font-size:clamp(18px,2.6vw,23px);
-    color:var(--db-jindal);
-    background:var(--db-cream);
-    padding:5px 18px;border-radius:999px;
-    box-shadow:2px 3px 0 rgba(106,27,77,.15);
-  }
-  .db-hint .arrow{animation:dbSlide 1.6s ease-in-out infinite;}
-  @keyframes dbSlide{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
-
-  /* 담벼락에 핀 참꽃 덩굴 (장식) */
-  .db-vine{position:absolute;z-index:2;pointer-events:none;}
-  .db-vine.tl{left:-6px;top:34%;width:min(38%,240px);}
-  .db-vine.br{right:-6px;bottom:-4px;width:min(46%,300px);transform:scaleX(-1);}
-
-  /* ---------- 가로 갤러리(담벼락) ---------- */
-  .db-gallery-wrap{position:relative;margin-top:18px;}
-  .db-rail-head{
-    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
-    flex-wrap:wrap;margin:0 4px 12px;
-  }
-  .db-rail-title{
-    font-family:"Gaegu","Noto Sans KR",cursive;font-weight:700;
-    font-size:clamp(20px,3.4vw,26px);color:var(--db-jindal);margin:0;
-  }
-  .db-rail-note{
-    font-family:"Nanum Pen Script",cursive;font-size:18px;color:var(--db-leaf-deep);
-  }
-
-  /* 담벼락 트랙: 가로 스크롤 스냅 */
-  .db-wall{
-    position:relative;
-    display:flex;
-    gap:0;
-    overflow-x:auto;
-    overflow-y:hidden;
-    scroll-snap-type:x proximity;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:thin;
-    scrollbar-color:var(--db-jindal-soft) transparent;
-    padding:0 0 18px;
-    background:
-      /* 담벼락 회벽 질감 */
-      repeating-linear-gradient(90deg, rgba(0,0,0,.015) 0 2px, transparent 2px 7px),
-      linear-gradient(180deg,var(--db-wall) 0%, var(--db-wall-2) 100%);
-    border-radius:10px;
-    box-shadow:inset 0 2px 8px rgba(120,90,60,.14), 0 14px 40px -28px rgba(60,40,30,.6);
-    border:1px solid var(--db-wall-shadow);
-    scroll-behavior:smooth;
-  }
-  .db-wall::-webkit-scrollbar{height:10px;}
-  .db-wall::-webkit-scrollbar-thumb{background:var(--db-jindal-soft);border-radius:99px;}
-  .db-wall::-webkit-scrollbar-track{background:transparent;}
-
-  /* 담장 아래 벽돌 굽도리 */
-  .db-plinth{
-    height:22px;border-radius:0 0 10px 10px;margin-top:-8px;
-    background:
-      repeating-linear-gradient(90deg, var(--db-brick) 0 34px, #b57a50 34px 36px),
-      repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0 10px, transparent 10px 11px);
-    box-shadow:inset 0 3px 6px rgba(0,0,0,.18);
-  }
-
-  /* content 래퍼가 있든(폴백) 없든(실제 생성기) 항상 동작하도록
-     .db-wall 하위 section을 직접 겨냥. 래퍼가 있으면 display:contents로 투명화 */
-  .db-wall > .content{display:contents;}
-  .db-wall{counter-reset:dbpanel;}
-
-  /* 각 벽화 패널 = 하나의 section */
-  .db-wall section{
-    scroll-snap-align:start;
-    flex:0 0 clamp(280px,80vw,420px);
-    margin:0;
-    padding:clamp(20px,3vw,30px) clamp(20px,3vw,28px) clamp(22px,3vw,30px);
-    position:relative;
-    background:var(--db-cream);
-    border-right:3px solid var(--db-wall-shadow);
-    box-shadow:inset -14px 0 22px -18px rgba(90,60,40,.5), inset 14px 0 22px -18px rgba(90,60,40,.35);
-  }
-  .db-wall section:first-child{border-radius:10px 0 0 10px;}
-  .db-wall section:last-child{border-right:none;border-radius:0 10px 10px 0;}
-  /* 벽화 액자 테두리 */
-  .db-wall section::before{
-    content:"";position:absolute;inset:12px;
-    border:2px dashed rgba(106,27,77,.28);
-    border-radius:10px;pointer-events:none;
-  }
-  /* 패널마다 참꽃 번호표 */
-  .db-wall section::after{
-    counter-increment:dbpanel;
-    content:"제 " counter(dbpanel) " 벽";
-    position:absolute;top:16px;right:20px;
-    font-family:"Nanum Pen Script",cursive;font-size:17px;
-    color:var(--db-jindal-soft);opacity:.85;
-  }
-
-  .db-wall h2{
-    font-family:"Gaegu","Noto Sans KR",cursive;font-weight:700;
-    font-size:clamp(21px,3vw,27px);
-    color:var(--db-jindal);
-    margin:6px 0 14px;line-height:1.2;
-    display:flex;align-items:center;gap:10px;
-  }
-  .db-wall h2::before{
-    content:"";flex:0 0 auto;width:22px;height:22px;
+  /* 돋보기 링(커서 추종) */
+  #dalseong-topo .mag-ring{
+    position:fixed;
+    top:0;left:0;
+    width:calc(var(--mag-r,120px)*2);
+    height:calc(var(--mag-r,120px)*2);
+    margin-left:calc(var(--mag-r,120px)*-1);
+    margin-top:calc(var(--mag-r,120px)*-1);
+    transform:translate(var(--mx,-999px),var(--my,-999px));
     border-radius:50%;
-    clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
-    background:var(--db-jindal);
+    border:1.5px solid var(--topo-blue);
+    box-shadow:0 0 0 1px rgba(255,255,255,.6) inset,0 0 22px rgba(65,105,225,.28);
+    z-index:2;
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .3s ease;
   }
-  .db-wall p{margin:0 0 12px;font-size:15.5px;color:#4a3a3e;}
-  .db-wall p:last-child{margin-bottom:0;}
-
-  /* facts / symbols 카드 */
-  .db-wall .facts,
-  .db-wall .symbols{
-    list-style:none;padding:0;margin:8px 0 0;display:grid;gap:10px;
-  }
-  .db-wall .facts li,
-  .db-wall .symbols li{
-    background:#fff;border:1px solid var(--db-jindal-pale);
-    border-left:5px solid var(--db-leaf);
-    border-radius:9px;padding:10px 14px;font-size:14.5px;
-    box-shadow:2px 3px 0 rgba(139,195,74,.14);
-  }
-
-  /* 일반 목록(명소/문화/자연/링크/출처) */
-  .db-wall ul:not(.facts):not(.symbols){
-    list-style:none;padding:0;margin:8px 0 0;
-  }
-  .db-wall ul:not(.facts):not(.symbols) li{
-    position:relative;padding:8px 8px 8px 26px;margin:0 0 6px;
-    font-size:14.8px;
-    border-bottom:1px dashed rgba(106,27,77,.18);
-  }
-  .db-wall ul:not(.facts):not(.symbols) li::before{
-    content:"";position:absolute;left:4px;top:14px;width:12px;height:12px;
-    background:var(--db-jindal);
-    clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
-  }
-  .db-wall ul li strong{color:var(--db-jindal);font-weight:700;}
-
-  /* FAQ */
-  .db-wall .faq details{
-    background:#fff;border:1px solid var(--db-jindal-pale);
-    border-radius:9px;margin:8px 0;padding:2px 14px;
-  }
-  .db-wall .faq summary{
-    cursor:pointer;list-style:none;position:relative;padding:11px 26px 11px 0;
-    font-family:"Gaegu","Noto Sans KR",cursive;font-weight:700;font-size:16px;
-    color:var(--db-jindal);
-  }
-  .db-wall .faq summary::-webkit-details-marker{display:none;}
-  .db-wall .faq summary::after{
-    content:"❀";position:absolute;right:2px;top:50%;transform:translateY(-50%);
-    color:var(--db-leaf-deep);transition:transform .3s ease;
-  }
-  .db-wall .faq details[open] summary::after{transform:translateY(-50%) rotate(180deg);color:var(--db-jindal);}
-  .db-wall .faq details p{font-size:14.3px;color:#54444a;padding:0 0 12px;}
-
-  .db-wall a{color:var(--db-jindal);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--db-leaf);}
-  .db-wall a:hover{text-decoration-color:var(--db-jindal);}
-  .db-wall #sources,
-  .db-wall #github{background:#f6efe0;}
-  .db-wall #sources{font-size:13.6px;}
-
-  /* 진행 표시(참꽃 덩굴이 담장을 따라 핀다) */
-  .db-progress{
-    position:relative;height:12px;margin:12px 6px 0;border-radius:99px;
-    background:var(--db-wall-2);overflow:hidden;border:1px solid var(--db-wall-shadow);
-  }
-  .db-progress-fill{
-    position:absolute;left:0;top:0;bottom:0;width:0%;
-    background:linear-gradient(90deg,var(--db-leaf) 0%, var(--db-jindal-soft) 60%, var(--db-jindal) 100%);
-    transition:width .15s linear;
-  }
-  .db-progress-dots{
-    display:flex;gap:7px;justify-content:center;margin:10px 0 0;flex-wrap:wrap;
-  }
-  .db-dot{
-    width:12px;height:12px;border:none;padding:0;cursor:pointer;background:transparent;
-  }
-  .db-dot i{
-    display:block;width:12px;height:12px;background:var(--db-wall-shadow);
-    clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
-    transition:background .2s ease,transform .2s ease;
-  }
-  .db-dot[aria-current="true"] i{background:var(--db-jindal);transform:scale(1.35);}
-  .db-dot:hover i{background:var(--db-jindal-soft);}
-
-  /* 화살표 버튼 */
-  .db-nav{
-    position:absolute;top:50%;transform:translateY(-50%);z-index:5;
-    width:44px;height:44px;border-radius:50%;border:2px solid var(--db-jindal);
-    background:var(--db-cream);color:var(--db-jindal);
-    font-size:20px;cursor:pointer;display:none;align-items:center;justify-content:center;
-    box-shadow:2px 3px 0 rgba(106,27,77,.2);
-  }
-  .db-nav:hover{background:var(--db-jindal);color:#fff;}
-  .db-nav:disabled{opacity:.35;cursor:default;}
-  .db-nav.prev{left:-6px;}
-  .db-nav.next{right:-6px;}
-  .db-enhanced .db-nav{display:flex;}
-
-  .db-foot{
-    text-align:center;margin:22px 0 4px;
-    font-family:"Nanum Pen Script",cursive;font-size:19px;color:var(--db-jindal-soft);
+  #dalseong-topo.mag-on .mag-ring{opacity:.85}
+  #dalseong-topo .mag-ring::after{
+    content:"⊕ 등고선 확대";
+    position:absolute;
+    left:50%;bottom:-1.6em;
+    transform:translateX(-50%);
+    font-size:10px;
+    letter-spacing:.12em;
+    color:var(--topo-blue);
+    white-space:nowrap;
+    text-shadow:0 1px 3px rgba(244,247,241,.9);
   }
 
-  /* JS 미적용/reduced-motion 시에도 트랙은 스크롤 가능(콘텐츠 전부 노출) */
-  @media (prefers-reduced-motion:reduce){
-    .db-wall{scroll-behavior:auto;}
-    .db-hint .arrow{animation:none;}
+  /* ===== 콘텐츠 셸 ===== */
+  #dalseong-topo .topo-shell{
+    position:relative;
+    z-index:3;
+    max-width:960px;
+    margin:0 auto;
+    padding:clamp(20px,5vw,64px) clamp(16px,4vw,40px) 96px;
   }
+
+  /* 헤더 */
+  #dalseong-topo .topo-hero{
+    position:relative;
+    padding:clamp(28px,5vw,52px) clamp(20px,4vw,44px);
+    margin-bottom:44px;
+    background:rgba(244,247,241,.82);
+    backdrop-filter:blur(2px);
+    border:1.5px solid var(--topo-line-strong);
+    clip-path:polygon(0 14px,18px 0,calc(100% - 30px) 0,100% 24px,100% calc(100% - 12px),calc(100% - 16px) 100%,26px 100%,0 calc(100% - 26px));
+  }
+  #dalseong-topo .topo-coord{
+    font-size:11px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--topo-blue);
+    margin:0 0 14px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  #dalseong-topo .topo-coord b{
+    color:var(--topo-green);
+    font-weight:700;
+    padding:2px 8px;
+    background:rgba(34,139,34,.1);
+    clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
+  }
+  #dalseong-topo .topo-hero h1{
+    font-family:var(--topo-mono);
+    font-weight:700;
+    font-size:clamp(28px,6vw,52px);
+    line-height:1.12;
+    margin:0 0 16px;
+    color:var(--topo-ink);
+    letter-spacing:-.01em;
+  }
+  #dalseong-topo .topo-hero h1 .accent{color:var(--topo-green)}
+  #dalseong-topo .topo-hero .lede{
+    font-size:clamp(14px,2.4vw,17px);
+    color:#2b3b2f;
+    margin:0;
+    max-width:60ch;
+  }
+  #dalseong-topo .topo-elev{
+    margin-top:22px;
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:var(--topo-blue);
+  }
+  #dalseong-topo .topo-elev span{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  #dalseong-topo .topo-elev span::before{
+    content:"";
+    width:22px;height:0;
+    border-top:2px dashed var(--topo-green);
+  }
+
+  /* 본문 콘텐츠 스타일 (생성기 텍스트) */
+  #dalseong-topo .topo-content{
+    position:relative;
+  }
+  #dalseong-topo .topo-content section{
+    position:relative;
+    background:rgba(244,247,241,.86);
+    backdrop-filter:blur(1.5px);
+    border-left:3px solid var(--topo-green);
+    padding:clamp(20px,3.5vw,32px) clamp(18px,3.5vw,34px);
+    margin:0 0 26px;
+    clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,22px 100%,0 calc(100% - 22px));
+    box-shadow:0 2px 0 rgba(34,139,34,.08);
+  }
+  #dalseong-topo .topo-content section::before{
+    content:"◇ " attr(id);
+    position:absolute;
+    top:10px;right:16px;
+    font-size:10px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--topo-line-strong);
+  }
+  #dalseong-topo .topo-content h2{
+    font-size:clamp(18px,3.4vw,25px);
+    color:var(--topo-green);
+    margin:0 0 14px;
+    padding-bottom:8px;
+    border-bottom:1.5px dashed var(--topo-line);
+    letter-spacing:-.01em;
+  }
+  #dalseong-topo .topo-content h3{
+    font-size:clamp(15px,2.6vw,18px);
+    color:var(--topo-blue);
+    margin:20px 0 8px;
+  }
+  #dalseong-topo .topo-content p{margin:0 0 12px}
+  #dalseong-topo .topo-content a{
+    color:var(--topo-blue);
+    text-decoration:underline;
+    text-underline-offset:3px;
+    text-decoration-color:rgba(65,105,225,.4);
+    word-break:break-all;
+  }
+  #dalseong-topo .topo-content a:hover{text-decoration-color:var(--topo-blue)}
+  #dalseong-topo .topo-content ul,
+  #dalseong-topo .topo-content ol{padding-left:1.3em;margin:0 0 12px}
+  #dalseong-topo .topo-content li{margin:0 0 6px}
+
+  /* facts / symbols 리스트 */
+  #dalseong-topo .topo-content .facts,
+  #dalseong-topo .topo-content .symbols{
+    list-style:none;
+    padding:0;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:10px;
+  }
+  #dalseong-topo .topo-content .facts li,
+  #dalseong-topo .topo-content .symbols li{
+    background:rgba(65,105,225,.07);
+    border:1px solid rgba(65,105,225,.2);
+    padding:10px 12px;
+    margin:0;
+    font-size:13px;
+    clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%);
+  }
+  #dalseong-topo .topo-content .symbols li{
+    background:rgba(34,139,34,.08);
+    border-color:rgba(34,139,34,.25);
+  }
+
+  /* FAQ details/summary */
+  #dalseong-topo .topo-content .faq details{
+    border:1px solid var(--topo-line);
+    border-left:3px solid var(--topo-blue);
+    margin:0 0 10px;
+    background:rgba(255,255,255,.5);
+    clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,0 100%);
+  }
+  #dalseong-topo .topo-content .faq summary{
+    cursor:pointer;
+    padding:12px 16px;
+    font-weight:700;
+    color:var(--topo-ink);
+    list-style:none;
+    position:relative;
+    padding-right:36px;
+  }
+  #dalseong-topo .topo-content .faq summary::-webkit-details-marker{display:none}
+  #dalseong-topo .topo-content .faq summary::after{
+    content:"△";
+    position:absolute;
+    right:16px;top:12px;
+    color:var(--topo-green);
+    transition:transform .25s ease;
+  }
+  #dalseong-topo .topo-content .faq details[open] summary::after{transform:rotate(180deg)}
+  #dalseong-topo .topo-content .faq details > *:not(summary){
+    padding:0 16px 14px;
+    margin:0;
+    font-size:14px;
+    color:#2b3b2f;
+  }
+
+  /* 하단 지형 범례 */
+  #dalseong-topo .topo-legend{
+    margin-top:40px;
+    padding:18px 20px;
+    border:1px dashed var(--topo-line-strong);
+    font-size:11.5px;
+    color:#3a4d3e;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px 26px;
+    align-items:center;
+    background:rgba(244,247,241,.7);
+  }
+  #dalseong-topo .topo-legend .k{color:var(--topo-blue);font-weight:700;letter-spacing:.1em}
+  #dalseong-topo .topo-legend em{
+    font-style:normal;
+    color:var(--topo-green);
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  #dalseong-topo .topo-legend em::before{
+    content:"";width:20px;border-top:2px solid currentColor;
+  }
+
+  /* 힌트 배지 */
+  #dalseong-topo .mag-hint{
+    position:fixed;
+    right:16px;bottom:16px;
+    z-index:4;
+    font-size:11px;
+    color:var(--topo-blue);
+    background:rgba(244,247,241,.92);
+    border:1px solid var(--topo-line-strong);
+    padding:7px 12px;
+    letter-spacing:.05em;
+    clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px);
+    pointer-events:none;
+    box-shadow:0 4px 14px rgba(34,139,34,.14);
+  }
+  #dalseong-topo.mag-on .mag-hint{opacity:.5}
+
   @media (max-width:640px){
-    .db-vine.tl{display:none;}
-    .db-wall section{flex-basis:86vw;}
+    #dalseong-topo .topo-magnify,
+    #dalseong-topo .mag-ring,
+    #dalseong-topo .mag-hint{display:none}
+    #dalseong-topo .topo-bg{opacity:.55}
+  }
+  @media (prefers-reduced-motion:reduce){
+    #dalseong-topo .topo-magnify .topo-svg{transition:none}
   }
 </style>
 
-<div class="db-root">
+<div id="dalseong-topo">
+  <!-- ===== 등고선 배경 (비슬산 지형 감성) ===== -->
+  <svg class="topo-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <radialGradient id="dalseongGlow" cx="62%" cy="40%" r="70%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity=".0"/>
+        <stop offset="100%" stop-color="#228B22" stop-opacity=".05"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#dalseongGlow)"/>
+    <g fill="none" stroke="#228B22" stroke-opacity=".22" stroke-width="1">
+      <ellipse cx="760" cy="330" rx="120" ry="90"/>
+      <ellipse cx="760" cy="330" rx="200" ry="150"/>
+      <ellipse cx="760" cy="330" rx="290" ry="215"/>
+      <ellipse cx="760" cy="330" rx="390" ry="290"/>
+      <ellipse cx="760" cy="330" rx="500" ry="370"/>
+      <ellipse cx="760" cy="330" rx="620" ry="460"/>
+      <ellipse cx="280" cy="560" rx="90" ry="70"/>
+      <ellipse cx="280" cy="560" rx="160" ry="120"/>
+      <ellipse cx="280" cy="560" rx="240" ry="180"/>
+      <ellipse cx="280" cy="560" rx="330" ry="250"/>
+    </g>
+    <g stroke="#4169E1" stroke-opacity=".22" stroke-width="1" fill="none">
+      <path d="M0,150 C220,120 380,220 560,190 C760,155 940,250 1200,210"/>
+      <path d="M0,690 C260,720 420,630 640,660 C880,695 1020,610 1200,650"/>
+      <path d="M120,0 C150,180 60,340 130,520 C190,680 120,760 150,800"/>
+    </g>
+    <!-- 비슬산 정상 마커 -->
+    <g stroke="#228B22" stroke-opacity=".4" fill="none">
+      <path d="M745,318 l15,-22 l15,22 z" stroke-width="1.4"/>
+    </g>
+  </svg>
 
-  <div class="db-hero">
-    <div class="db-tiles" aria-hidden="true"></div>
-
-    <!-- 참꽃 덩굴 장식 -->
-    <svg class="db-vine tl" viewBox="0 0 200 160" aria-hidden="true">
-      <path d="M4 150 C 40 120 30 70 70 60 C 110 50 120 20 170 10" fill="none" stroke="#5c8a2c" stroke-width="4" stroke-linecap="round"/>
-      <g fill="#6A1B4D">
-        <circle cx="70" cy="60" r="9"/><circle cx="120" cy="30" r="8"/><circle cx="168" cy="12" r="10"/><circle cx="40" cy="120" r="7"/>
+  <!-- ===== 돋보기 레이어(동일 지형, 확대·고선명) ===== -->
+  <div class="topo-magnify" aria-hidden="true">
+    <svg class="topo-svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g fill="none" stroke="#228B22" stroke-width="1.4">
+        <ellipse cx="760" cy="330" rx="120" ry="90"/>
+        <ellipse cx="760" cy="330" rx="160" ry="120"/>
+        <ellipse cx="760" cy="330" rx="200" ry="150"/>
+        <ellipse cx="760" cy="330" rx="245" ry="182"/>
+        <ellipse cx="760" cy="330" rx="290" ry="215"/>
+        <ellipse cx="760" cy="330" rx="340" ry="252"/>
+        <ellipse cx="760" cy="330" rx="390" ry="290"/>
+        <ellipse cx="760" cy="330" rx="445" ry="330"/>
+        <ellipse cx="760" cy="330" rx="500" ry="370"/>
+        <ellipse cx="280" cy="560" rx="90" ry="70"/>
+        <ellipse cx="280" cy="560" rx="125" ry="95"/>
+        <ellipse cx="280" cy="560" rx="160" ry="120"/>
+        <ellipse cx="280" cy="560" rx="200" ry="150"/>
+        <ellipse cx="280" cy="560" rx="240" ry="180"/>
       </g>
-      <g fill="#8BC34A">
-        <ellipse cx="55" cy="88" rx="8" ry="4" transform="rotate(-30 55 88)"/>
-        <ellipse cx="95" cy="52" rx="8" ry="4" transform="rotate(20 95 52)"/>
+      <g stroke="#4169E1" stroke-width="1.4" fill="none">
+        <path d="M0,150 C220,120 380,220 560,190 C760,155 940,250 1200,210"/>
+        <path d="M0,690 C260,720 420,630 640,660 C880,695 1020,610 1200,650"/>
+        <path d="M120,0 C150,180 60,340 130,520 C190,680 120,760 150,800"/>
       </g>
-    </svg>
-
-    <div class="db-hero-in">
-      <span class="db-eyebrow">대구광역시 · 마비정 벽화마을 가는 길</span>
-      <h1 class="db-title">달성군 지역 정보 · 대구광역시</h1>
-      <p class="db-sub">달성군은 대구광역시 유일의 군(郡)이면서도 전국 군 지역 가운데 인구가 가장 많은, 도시와 농촌의 얼굴을 함께 지닌 곳입니다. 낙동강이 서쪽 경계를 감싸 흐르고 남동쪽으로 참꽃(진달래)으로 이름난 비슬산이 우뚝 솟아, 강과 산이 군의 골격을 이룹니다. 화원읍·다사읍처럼 대구 도심과 맞붙어 도시철도가 연결된 생활권이 있는가 하면, 유가읍·현풍읍 일대에는 대구테크노폴리스와 대구경북과학기술원(DGIST)이 들어선 연구·산업 신도시가 새로 자라났습니다. 우리나라에 처음 피아노가 들어온 사문진 나루터와 유네스코 세계유산 도동서원이 나란히 자리해 근대사와 유교 전통을 동시에 품고 있습니다. 봄이면 비슬산 능선을 뒤덮는 분홍빛 참꽃 군락이 군 전체를 상징하는 풍경으로 손꼽힙니다.</p>
-      <span class="db-hint">
-        담벼락을 따라 옆으로 걸어보세요
-        <span class="arrow" aria-hidden="true">→</span>
-      </span>
-    </div>
-
-    <svg class="db-vine br" viewBox="0 0 300 120" aria-hidden="true">
-      <path d="M0 110 C 60 90 90 40 150 40 C 210 40 250 20 300 4" fill="none" stroke="#5c8a2c" stroke-width="4" stroke-linecap="round"/>
-      <g fill="#6A1B4D">
-        <circle cx="150" cy="40" r="9"/><circle cx="210" cy="34" r="8"/><circle cx="90" cy="58" r="8"/><circle cx="260" cy="16" r="7"/>
+      <g stroke="#228B22" stroke-width="1.6" fill="none">
+        <path d="M745,318 l15,-22 l15,22 z"/>
       </g>
     </svg>
   </div>
 
-  <div class="db-gallery-wrap">
-    <div class="db-rail-head">
-      <p class="db-rail-title">달성 담벼락 벽화 갤러리</p>
-      <span class="db-rail-note">비슬산 참꽃빛으로 그린 아홉 폭 이야기</span>
-    </div>
+  <div class="mag-ring" aria-hidden="true"></div>
 
-    <button class="db-nav prev" type="button" aria-label="이전 벽화">‹</button>
-    <button class="db-nav next" type="button" aria-label="다음 벽화">›</button>
+  <div class="topo-shell">
+    <header class="topo-hero">
+      <p class="topo-coord">
+        <b>kr-daegu-dalseong</b>
+        <span>ELEV. TOPOGRAPHIC MAP</span>
+        <span data-coords>△ 비슬산 / 마비정</span>
+      </p>
+      <h1>대구광역시 <span class="accent">달성군</span></h1>
+      <p class="lede">달성군 지역 정보 · 대구광역시</p>
+      <div class="topo-elev">
+        <span>등고선 지형</span>
+        <span>커서 반경 돋보기</span>
+        <span data-scale>1:25,000</span>
+      </div>
+    </header>
 
-    <!-- ★ 크롤 가능한 9섹션 실제 텍스트. 향상 전에도 전부 읽힘. -->
-    <div class="db-wall" id="db-wall" tabindex="0" role="region" aria-label="달성군 지역 정보 벽화 갤러리">
+    <!-- 생성기가 9섹션 실제 텍스트로 치환 (JS 없어도 그대로 읽힘) -->
+    <main class="topo-content">
             <section id="intro">
         <h2>지역 소개</h2>
         <p>달성군은 대구광역시 유일의 군(郡)이면서도 전국 군 지역 가운데 인구가 가장 많은, 도시와 농촌의 얼굴을 함께 지닌 곳입니다. 낙동강이 서쪽 경계를 감싸 흐르고 남동쪽으로 참꽃(진달래)으로 이름난 비슬산이 우뚝 솟아, 강과 산이 군의 골격을 이룹니다. 화원읍·다사읍처럼 대구 도심과 맞붙어 도시철도가 연결된 생활권이 있는가 하면, 유가읍·현풍읍 일대에는 대구테크노폴리스와 대구경북과학기술원(DGIST)이 들어선 연구·산업 신도시가 새로 자라났습니다. 우리나라에 처음 피아노가 들어온 사문진 나루터와 유네스코 세계유산 도동서원이 나란히 자리해 근대사와 유교 전통을 동시에 품고 있습니다. 봄이면 비슬산 능선을 뒤덮는 분홍빛 참꽃 군락이 군 전체를 상징하는 풍경으로 손꼽힙니다.</p>
@@ -675,172 +726,81 @@
           <li><a href="https://ko.wikipedia.org/wiki/설화명곡역" rel="noopener">설화명곡역 / 대구 도시철도 1호선 - 위키백과</a> (조회 2026-07-08)</li>
         </ul>
       </section>
+    </main>
+
+    <div class="topo-legend" aria-hidden="true">
+      <span class="k">범례 / LEGEND</span>
+      <em>등고선 · 능선</em>
+      <em style="color:var(--topo-blue)">수계 · 하천</em>
+      <span>비슬산(琵瑟山) · 마비정벽화마을 · 달성습지 감성의 지형 랜딩</span>
     </div>
-
-    <div class="db-plinth" aria-hidden="true"></div>
-
-    <div class="db-progress" aria-hidden="true"><div class="db-progress-fill" id="db-fill"></div></div>
-    <div class="db-progress-dots" id="db-dots" role="tablist" aria-label="벽화 바로가기"></div>
-
-    <p class="db-foot">— 마비정 벽화마을처럼, 걸음마다 한 폭씩 —</p>
   </div>
 
+  <div class="mag-hint" aria-hidden="true">커서를 움직여 지형을 확대해 보세요 ⊕</div>
 </div>
 
 <script>
 (function(){
-  "use strict";
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var wall = document.getElementById("db-wall");
-  if(!wall) return;
+  var root=document.getElementById('dalseong-topo');
+  if(!root) return;
 
-  // 실제 생성기는 콘텐츠 토큰을 벌거벗은 <section>들로 주입(.content 래퍼 없음).
-  // 폴백 경로에선 .content로 감싸지므로, 어느 쪽이든 하위 section을 모두 잡는다.
-  var panels = Array.prototype.slice.call(wall.querySelectorAll("section"));
-  if(!panels.length) return;
-
-  var root = wall.closest(".db-root");
-  root.classList.add("db-enhanced");
-
-  var fill = document.getElementById("db-fill");
-  var dotsWrap = document.getElementById("db-dots");
-  var prevBtn = document.querySelector(".db-nav.prev");
-  var nextBtn = document.querySelector(".db-nav.next");
-
-  /* ---------- 도트 네비게이션 생성 ---------- */
-  var dots = [];
-  panels.forEach(function(sec, i){
-    var b = document.createElement("button");
-    b.className = "db-dot";
-    b.type = "button";
-    b.setAttribute("role","tab");
-    var h2 = sec.querySelector("h2");
-    b.setAttribute("aria-label", (h2 ? h2.textContent.trim() : ("벽화 " + (i+1))) + " 로 이동");
-    b.innerHTML = "<i></i>";
-    b.addEventListener("click", function(){ scrollToPanel(i); });
-    dotsWrap.appendChild(b);
-    dots.push(b);
-  });
-
-  function panelLeft(i){
-    // .db-wall이 position:relative 이므로 offsetLeft는 이미 트랙 기준 스크롤 좌표.
-    return panels[i].offsetLeft;
-  }
-  function scrollToPanel(i){
-    i = Math.max(0, Math.min(panels.length-1, i));
-    wall.scrollTo({ left: panelLeft(i), behavior: reduce ? "auto" : "smooth" });
-  }
-
-  /* ---------- 현재 위치 → 진행바 + 활성 도트 ---------- */
-  var current = 0;
-  function update(){
-    var max = wall.scrollWidth - wall.clientWidth;
-    var pct = max > 0 ? (wall.scrollLeft / max) * 100 : 0;
-    if(fill) fill.style.width = pct + "%";
-
-    // 뷰포트 중앙에 가장 가까운 패널을 현재로
-    var mid = wall.scrollLeft + wall.clientWidth/2;
-    var best = 0, bestDist = Infinity;
-    panels.forEach(function(sec, i){
-      var c = sec.offsetLeft + sec.offsetWidth/2;
-      var d = Math.abs(c - mid);
-      if(d < bestDist){ bestDist = d; best = i; }
-    });
-    if(best !== current){ current = best; }
-    dots.forEach(function(d,i){ d.setAttribute("aria-current", i===current ? "true":"false"); });
-    if(prevBtn) prevBtn.disabled = (wall.scrollLeft <= 2);
-    if(nextBtn) nextBtn.disabled = (wall.scrollLeft >= max-2);
-  }
-
-  var ticking = false;
-  wall.addEventListener("scroll", function(){
-    if(!ticking){ requestAnimationFrame(function(){ update(); ticking=false; }); ticking=true; }
-  }, {passive:true});
-
-  if(prevBtn) prevBtn.addEventListener("click", function(){ scrollToPanel(current-1); });
-  if(nextBtn) nextBtn.addEventListener("click", function(){ scrollToPanel(current+1); });
-
-  /* ---------- 세로 휠 → 가로 스크롤(데스크톱 향상) ---------- */
-  wall.addEventListener("wheel", function(ev){
-    // 트랙패드의 자연스러운 가로 제스처는 그대로 두고, 세로 휠만 가로로 전환
-    if(Math.abs(ev.deltaY) > Math.abs(ev.deltaX)){
-      var max = wall.scrollWidth - wall.clientWidth;
-      var atStart = wall.scrollLeft <= 0 && ev.deltaY < 0;
-      var atEnd = wall.scrollLeft >= max && ev.deltaY > 0;
-      if(!atStart && !atEnd){
-        wall.scrollLeft += ev.deltaY;
-        ev.preventDefault();
+  /* region-data JSON은 생성기가 주입 — 읽기만 한다 */
+  try{
+    var el=document.getElementById('region-data');
+    if(el){
+      var d=JSON.parse(el.textContent||'{}');
+      var c=root.querySelector('[data-coords]');
+      if(c && d.coords && (d.coords.lat!=null) && (d.coords.lon!=null)){
+        var la=Number(d.coords.lat).toFixed(3), lo=Number(d.coords.lon).toFixed(3);
+        c.textContent='△ '+la+'°N '+lo+'°E';
+      }
+      var sc=root.querySelector('[data-scale]');
+      if(sc && d.symbols){
+        var sym=d.symbols;
+        var pick=(sym.tree||sym.mountain||sym.flower||sym.bird);
+        if(pick) sc.textContent='심볼 · '+pick;
       }
     }
-  }, {passive:false});
+  }catch(e){/* JSON 없거나 파싱 실패해도 콘텐츠는 그대로 노출 */}
 
-  /* ---------- 키보드 접근성 ---------- */
-  wall.addEventListener("keydown", function(ev){
-    if(ev.key === "ArrowRight"){ scrollToPanel(current+1); ev.preventDefault(); }
-    else if(ev.key === "ArrowLeft"){ scrollToPanel(current-1); ev.preventDefault(); }
-    else if(ev.key === "Home"){ scrollToPanel(0); ev.preventDefault(); }
-    else if(ev.key === "End"){ scrollToPanel(panels.length-1); ev.preventDefault(); }
-  });
+  /* 모바일/reduced 환경에선 돋보기 비활성 */
+  var fine=window.matchMedia('(pointer:fine)').matches && window.matchMedia('(min-width:641px)').matches;
+  if(!fine) return;
 
-  /* details 열릴 때 폭이 커지므로 위치 재계산 */
-  wall.addEventListener("toggle", function(){ requestAnimationFrame(update); }, true);
-  window.addEventListener("resize", function(){ requestAnimationFrame(update); });
+  var svgMag=root.querySelector('.topo-magnify .topo-svg');
+  var raf=null, tx=-999, ty=-999, active=false;
 
-  update();
-
-  /* ---------- 참꽃 꽃잎 흩날림(장식, region-data 위 표현) ---------- */
-  if(!reduce){
-    try{
-      var data = null;
-      var el = document.getElementById("region-data");
-      if(el){ try{ data = JSON.parse(el.textContent); }catch(_e){} }
-
-      var hero = document.querySelector(".db-hero");
-      if(hero){
-        var layer = document.createElement("div");
-        layer.setAttribute("aria-hidden","true");
-        layer.style.cssText = "position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;";
-        hero.appendChild(layer);
-
-        var COLORS = ["#6A1B4D","#a83b7e","#c9609a"];
-        function petal(){
-          var s = document.createElement("span");
-          var size = 8 + Math.random()*10;
-          var x = Math.random()*100;
-          var dur = 6 + Math.random()*6;
-          var col = COLORS[(Math.random()*COLORS.length)|0];
-          s.style.cssText =
-            "position:absolute;top:-16px;left:"+x+"%;width:"+size+"px;height:"+size+"px;"+
-            "background:"+col+";opacity:"+(0.5+Math.random()*0.4)+";"+
-            "clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);"+
-            "will-change:transform;animation:dbFall "+dur+"s linear forwards;";
-          layer.appendChild(s);
-          setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, dur*1000+200);
-        }
-        // keyframes 주입
-        var st = document.createElement("style");
-        st.textContent =
-          "@keyframes dbFall{0%{transform:translateY(0) rotate(0) translateX(0)}"+
-          "100%{transform:translateY(360px) rotate(360deg) translateX(30px);opacity:0}}";
-        document.head.appendChild(st);
-
-        var petalTimer = setInterval(petal, 850);
-        // 탭이 숨겨지면 멈춤(자원 절약)
-        document.addEventListener("visibilitychange", function(){
-          if(document.hidden){ clearInterval(petalTimer); petalTimer = null; }
-          else if(!petalTimer){ petalTimer = setInterval(petal, 850); }
-        });
-      }
-
-      /* region-data가 있으면 rail-note에 좌표 감성 한 줄(향상) */
-      if(data && data.coords && typeof data.coords.lat === "number"){
-        var note = document.querySelector(".db-rail-note");
-        if(note){
-          note.textContent = "비슬산 참꽃빛으로 그린 아홉 폭 이야기 · 북위 " + data.coords.lat.toFixed(2) + "°";
-        }
-      }
-    }catch(_){}
+  function paint(){
+    raf=null;
+    root.style.setProperty('--mx', tx+'px');
+    root.style.setProperty('--my', ty+'px');
+    if(svgMag){
+      svgMag.style.transformOrigin=tx+'px '+ty+'px';
+    }
   }
+  function onMove(e){
+    tx=e.clientX; ty=e.clientY;
+    if(!active){ active=true; root.classList.add('mag-on'); }
+    if(!raf) raf=requestAnimationFrame(paint);
+  }
+  function onLeave(){
+    active=false;
+    root.classList.remove('mag-on');
+  }
+
+  window.addEventListener('mousemove', onMove, {passive:true});
+  document.addEventListener('mouseleave', onLeave);
+
+  /* 스크롤 위치 보정 없이 fixed 레이어 사용 → clientX/Y 그대로 사용 */
+
+  /* 휠로 돋보기 반경 조절 (Alt 키) */
+  window.addEventListener('wheel', function(e){
+    if(!e.altKey || !active) return;
+    e.preventDefault();
+    var cur=parseFloat(getComputedStyle(root).getPropertyValue('--mag-r'))||120;
+    var next=Math.max(70, Math.min(220, cur + (e.deltaY<0? 12 : -12)));
+    root.style.setProperty('--mag-r', next+'px');
+  }, {passive:false});
 })();
 </script>
 </body>
